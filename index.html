@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Bike Finder</title>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
+
+</head>
+
+<body class="wallpaper">
+
+    <h1>BIKE FINDER</h1>
+
+    <input type="text" name="campoEndereco" id="campoEndereco" placeholder="Digite o local Ex(Praça quinze de novembro rio de janeiro Brasil)" >
+    <br>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+    <button type="button" onclick=apiBusca()>Encontrar</button>
+    <br>
+    <br>
+    <h2>Bicicletas mais proximas!</h2>
+    <textarea id='output' readonly="true" rows="30" cols="50" ></textarea>
+    <div id="map" style="position: absolute; width: 90vh; height: 50vh; top: 190px; left: 600px ">
+
+
+
+        <script>
+            var mapOptions = {
+                center: [-22.9035, -43.2096],
+                zoom: 12
+            }
+
+            let customIcon = {
+                iconUrl: 'https://cdn3.iconfinder.com/data/icons/sportix/125/sportix_bicycle-512.png',
+                iconSize: [40, 40]
+            }
+            let myIcon = L.icon(customIcon);
+
+            let iconOptions = {
+                title: 'bike rio',
+                draggable: false,
+                icon: myIcon
+            }
+
+            let customuserIcon = {
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/4974/4974554.png',
+                iconSize: [40, 40]
+            }
+            let userIcon = L.icon(customuserIcon);
+
+            let userIconOptions = {
+                title: 'Usuario',
+                draggable: false,
+                icon: userIcon
+            }
+
+            var map = new L.map('map', mapOptions);
+
+
+            var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+            map.addLayer(layer);
+
+
+       
+
+            var x = document.getElementById("map");
+
+           
+
+            function apiBusca() {
+                const parseLocalizacao = (infoLocal) => {
+
+                    const locationAux = JSON.stringify(infoLocal);
+                    const dataLocation = JSON.parse(locationAux);
+                    let marker = new L.Marker([dataLocation[0].lat, dataLocation[0].lon]); //localizaçao do usuario 
+                    marker.addTo(map);
+  
+
+                    apiRio(dataLocation);
+                }
+                enderecousuario = document.getElementById('campoEndereco').value;
+
+                fetch(`https://nominatim.openstreetmap.org/?addressdetails=1&q=<${enderecousuario}>&format=json&limit=1`,userIconOptions )
+                    .then(resposta => {
+                        resposta.json()
+                        .then(arq => parseLocalizacao(arq))
+
+                    })
+            }
+
+            function apiRio(dataLocation) {
+                const parseBike = (result, dataLocation) => {
+
+                    const dataAux = JSON.stringify(result);
+                    dataBike = JSON.parse(dataAux);
+                    marcaMapa(dataBike, dataLocation);
+
+                }
+                const options = {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'default'
+                }
+
+                fetch(`http://dadosabertos.rio.rj.gov.br/apiTransporte/apresentacao/rest/index.cfm/estacoesBikeRio`, options)
+                    .then(response => {
+                        response.json()
+                        .then(data => parseBike(data, dataLocation));
+                    })
+
+            }
+
+
+
+            function marcaMapa(dataBike, dataLocation) {
+
+                var i = 0;
+                distancias = new Array;
+                while (i < dataBike.DATA.length) {
+
+                    let marker = new L.Marker([dataBike.DATA[i][5], dataBike.DATA[i][6]], iconOptions); // locais das bikes
+                    marker.addTo(map);
+
+                    dif = Math.sqrt(Math.pow(dataBike.DATA[i][5] - dataLocation[0].lat, 2) + Math.pow(dataBike.DATA[i][6] - dataLocation[0].lon, 2)); //distancia 
+                    distancias[i] = [dif, dataBike.DATA[i][3]]; //salva endereço 
+                    i++;
+
+                }
+                distancias.sort();
+                contador = 0;
+                while (contador <= distancias.length) {
+                    document.getElementById('output').value += distancias[contador][1] + "\n";
+                    contador++;
+
+                }
+            }
+
+        </script>
+
+
+</body>
+
+</html>

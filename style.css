@@ -1,0 +1,43 @@
+ h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: rgb(0, 0, 0);
+        font-size: 90px;
+        position: fixed;
+        margin-top: 5vh;
+        left: 70vh;
+     
+    }
+
+    .wallpaper {
+     background-image: url("https://img.freepik.com/vetores-gratis/fundo-branco-abstrato_23-2148810353.jpg?w=2000");
+       
+    }
+ 
+  
+    textarea{
+        
+        position: fixed;
+        resize: none;
+        background-color:transparent;
+    }
+    #campoEndereco{
+        background-color:rgb(146, 146, 146); 
+        height: 10; 
+        width: 500px;
+        color:rgb(0, 0, 0);
+    }
+
+    @keyframes degrade {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+
+    }
